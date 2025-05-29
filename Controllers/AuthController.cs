@@ -71,7 +71,13 @@ namespace JwT_with_RefreshToken.Controllers
 
                 return BadRequest(new { message = result.ErrorMessage });
             }
-            return Ok(result.TokenResponse);
+            Response.Cookies.Append("refreshToken", result.TokenResponse.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+            });
+            return Ok(result.TokenResponse.AccessToken);
         }
     }
 }
