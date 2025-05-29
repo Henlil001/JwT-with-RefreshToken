@@ -24,7 +24,7 @@ namespace JwT_with_RefreshToken
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
+            
 
             app.MapControllers();
 

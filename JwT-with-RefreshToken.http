@@ -1,6 +1,15 @@
 @JwT_with_RefreshToken_HostAddress = http://localhost:5247
 
-GET {{JwT_with_RefreshToken_HostAddress}}/weatherforecast/
+POST {{JwT_with_RefreshToken_HostAddress}}/login/
+Accept: application/json
+
+###
+POST {{JwT_with_RefreshToken_HostAddress}}/refresh/
+Accept: application/json
+
+###
+
+POST {{JwT_with_RefreshToken_HostAddress}}/create-user/
 Accept: application/json
 
 ###
