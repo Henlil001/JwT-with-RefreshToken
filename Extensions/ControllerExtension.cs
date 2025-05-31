@@ -7,12 +7,11 @@ namespace JwT_with_RefreshToken.Extensions
         public static IServiceCollection AddControllerExtension(this IServiceCollection services)
         {
             services.AddControllers()
-                       .AddJsonOptions(options =>
-                       {
-                           options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-                           options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                           options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                       });
+                         .AddJsonOptions(options =>
+                         {
+                             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                         });
             return services;
         }
     }

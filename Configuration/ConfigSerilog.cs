@@ -6,8 +6,8 @@ namespace JwT_with_RefreshToken.Configuration
         public static ILoggingBuilder ConfigurateSerilog(this ILoggingBuilder builder, IConfiguration configuration)
         {
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration).
-                CreateLogger();
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
 
             builder.ClearProviders()
                 .AddSerilog(Log.Logger);

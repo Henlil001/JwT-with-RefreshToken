@@ -14,7 +14,9 @@ namespace JwT_with_RefreshToken.Configuration
                 string.IsNullOrWhiteSpace(appSettings.CorsPolicyName) ||
                 string.IsNullOrWhiteSpace(appSettings.Issuer) ||
                 string.IsNullOrWhiteSpace(appSettings.Audience) ||
-                string.IsNullOrWhiteSpace(appSettings.TokenKey))
+                string.IsNullOrWhiteSpace(appSettings.TokenKey) ||
+                string.IsNullOrWhiteSpace(appSettings.Roles.User) ||
+                string.IsNullOrWhiteSpace(appSettings.Roles.Admin))
             {
                 throw new Exception("AppSettings is not fully configured. Please check appsettings.json.");
             }

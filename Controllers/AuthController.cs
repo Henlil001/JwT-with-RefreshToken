@@ -20,7 +20,6 @@ namespace JwT_with_RefreshToken.Controllers
 
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
@@ -62,7 +61,6 @@ namespace JwT_with_RefreshToken.Controllers
         }
         [HttpPost("create-user")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken cancellationToken)
         {
@@ -73,7 +71,6 @@ namespace JwT_with_RefreshToken.Controllers
                 if (result.ErrorCode == "UserExists")
                     return Conflict(new { message = "User with this email already exists." });
 
-                return BadRequest(new { message = result.ErrorMessage });
             }
             Response.Cookies.Append("refreshToken", result.TokenResponse.RefreshToken, new CookieOptions
             {

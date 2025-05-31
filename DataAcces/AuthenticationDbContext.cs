@@ -19,12 +19,16 @@ namespace JwT_with_RefreshToken.DataAcces
                 .HasKey(u => u.UserId);
 
             modelBuilder.Entity<User>()
-                .HasMany(u => u.RefreshTokens)
+                .HasOne(u => u.RefreshToken)
                 .WithOne(rt => rt.User)
-                .HasForeignKey(rt => rt.UserId);
+                .HasForeignKey<RefreshToken>(rt => rt.UserId);
 
             modelBuilder.Entity<RefreshToken>()
                 .HasKey(rt => rt.Id);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(rt => rt.Token)
+                .IsUnique();
 
             modelBuilder.Entity<Role>()
                 .HasKey(r => r.RoleId);
@@ -32,7 +36,7 @@ namespace JwT_with_RefreshToken.DataAcces
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
-                .UsingEntity(j => j.ToTable("UserRoles")); 
+                .UsingEntity(j => j.ToTable("UserRoles"));
 
         }
     }

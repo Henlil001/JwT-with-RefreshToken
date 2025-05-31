@@ -1,9 +1,11 @@
 
 using Azure.Identity;
+using JwT_with_RefreshToken.AuthService;
 using JwT_with_RefreshToken.Common;
 using JwT_with_RefreshToken.Configuration;
 using JwT_with_RefreshToken.Extensions;
 using JwT_with_RefreshToken.Middleware;
+using JwT_with_RefreshToken.SeedData;
 using Microsoft.AspNetCore.Builder;
 using Serilog;
 
@@ -22,14 +24,13 @@ namespace JwT_with_RefreshToken
                     new Uri($"https://{configuration["KeyVaultName"]}.vault.azure.net/"),
                     new DefaultAzureCredential());
             }
+            //builder.Logging.ConfigurateSerilog(configuration);
 
             var appSettings = builder.Services.ValidateAppsettings(configuration);
 
-            builder.Logging.ConfigurateSerilog(configuration);
-
             builder.Services
-                .AddScopedExtension()
                 .AddControllerExtension()
+                .AddScopedExtension()
                 .AddCorsPolicyExtension(appSettings)
                 .AddJwtBearerExtension(appSettings)
                 .AddDbContextExtension(appSettings);
@@ -51,11 +52,13 @@ namespace JwT_with_RefreshToken
 
             app.MapControllers();
 
+            await app.InitializeRolesAsync(appSettings.Roles);
+
             try
             {
-               await app.RunAsync();
+                await app.RunAsync();
             }
-            finally 
+            finally
             {
                 await Log.CloseAndFlushAsync();
             }

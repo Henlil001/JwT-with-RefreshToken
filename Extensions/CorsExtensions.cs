@@ -11,6 +11,7 @@ namespace JwT_with_RefreshToken.Extensions
             options.AddPolicy(name: appsettings.CorsPolicyName, 
             policy => policy
             .AllowCredentials()
+            .AllowAnyHeader()
             .WithOrigins(appsettings.ClientDomain)
             .WithMethods("POST")));
 
