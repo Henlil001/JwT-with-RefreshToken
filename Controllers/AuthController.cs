@@ -1,5 +1,6 @@
 ﻿using JwT_with_RefreshToken.AuthService;
 using JwT_with_RefreshToken.DTO;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -10,17 +11,18 @@ namespace JwT_with_RefreshToken.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        readonly IAuthService _authService;
-        readonly ILogger<AuthController> _logger;
+        readonly IAuthenticationService _authService;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(IAuthenticationService authService)
         {
             _authService = authService;
-            _logger = logger;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] TokenRequest request, CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
             var tokenResponse = await _authService.LoginAsync(request, cancellationToken);
             if (tokenResponse is null)
@@ -30,12 +32,14 @@ namespace JwT_with_RefreshToken.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
             });
 
             return Ok( new { tokenResponse.AccessToken });
         }
         [HttpPost("refresh")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
         {
             var refreshToken = Request.Cookies["refreshToken"];
@@ -51,10 +55,10 @@ namespace JwT_with_RefreshToken.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
             });
 
-            return Ok(new { tokenResponse.AccessToken });
+            return Ok(new { AccessToken = tokenResponse.AccessToken });
         }
         [HttpPost("create-user")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -75,9 +79,9 @@ namespace JwT_with_RefreshToken.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
             });
-            return Ok(result.TokenResponse.AccessToken);
+            return Ok(new { AccessToken = result.TokenResponse.AccessToken });
         }
     }
 }

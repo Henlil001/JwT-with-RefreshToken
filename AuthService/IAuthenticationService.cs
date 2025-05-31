@@ -2,9 +2,9 @@
 
 namespace JwT_with_RefreshToken.AuthService
 {
-    public interface IAuthService
+    public interface IAuthenticationService
     {
-        Task<TokenResponse?> LoginAsync(TokenRequest request, CancellationToken cancellationToken);
+        Task<TokenResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
         Task<TokenResponse?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
         Task<CreateUserResult> CreateUserAsync(CreateUserRequest user, CancellationToken cancellationToken);
     }

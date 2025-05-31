@@ -17,6 +17,18 @@ namespace JwT_with_RefreshToken.Entities
         [Required]
         public string Address { get; set; }
         [Required]
-        public bool ConfirmedEmail { get; set; } = false;
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
+        public ICollection<Role> Roles { get; set; } = [];
+
+        public User(int userId, string email, string password, string firstName, string lastName, string address, ICollection<RefreshToken> refreshTokens)
+        {
+            UserId = userId;
+            Email = email;
+            Password = password;
+            FirstName = firstName;
+            LastName = lastName;
+            Address = address;
+            RefreshTokens = refreshTokens;
+        }
     }
 }

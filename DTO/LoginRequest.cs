@@ -2,7 +2,7 @@
 
 namespace JwT_with_RefreshToken.DTO
 {
-    public class TokenRequest
+    public class LoginRequest
     {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid Email.")]
