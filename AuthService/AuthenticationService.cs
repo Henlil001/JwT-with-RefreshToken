@@ -3,6 +3,7 @@ using JwT_with_RefreshToken.DataAcces;
 using JwT_with_RefreshToken.DTO;
 using JwT_with_RefreshToken.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -33,16 +34,17 @@ namespace JwT_with_RefreshToken.AuthService
             {
                 userResult.Success = false;
                 userResult.ErrorCode = "UserExists";
-
                 return userResult;
             }
 
+            var roles = _configuration.GetSection("AppSettings:Roles").Get<List<string>>();
+
             var defaultRole = await _context.Roles
-                .FirstOrDefaultAsync(r => r.RoleName == _configuration.GetValue<string>("Roles:User"), cancellationToken)
-                ?? throw new Exception("Default Role \"User\" dosent exist in database");
+                .FirstOrDefaultAsync(r => r.RoleName == roles![0], cancellationToken)
+                ?? throw new Exception($"Default Role {roles![0]} dosent exist in database");
 
             var refreshTokenObj = new RefreshToken();
-            refreshTokenObj.SetRefreshToken(GenerateRefreshToken);
+            refreshTokenObj.CreateRefreshToken();
 
             var newUser = new User()
             {
@@ -51,11 +53,11 @@ namespace JwT_with_RefreshToken.AuthService
                 Email = user.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
                 Address = user.Address,
-                RefreshToken = refreshTokenObj,
+                RefreshTokens = [refreshTokenObj],
                 Roles = [defaultRole]
             };
 
-            userResult.TokenResponse.RefreshToken = newUser.RefreshToken.Token;
+            userResult.TokenResponse.RefreshToken = refreshTokenObj.GetToken();
             userResult.TokenResponse.AccessToken = GenerateAccessToken(newUser);
 
             await _context.Users.AddAsync(newUser, cancellationToken);
@@ -66,10 +68,9 @@ namespace JwT_with_RefreshToken.AuthService
 
         public async Task<TokenResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
         {
-
             var user = await _context.Users
                 .Include(u => u.Roles)
-                .Include(u => u.RefreshToken)
+                .Include(u => u.RefreshTokens)
                 .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
@@ -77,16 +78,21 @@ namespace JwT_with_RefreshToken.AuthService
                 return null;
             }
 
-            user.RefreshToken.Token = GenerateRefreshToken();
-            user.RefreshToken.CreatedAt = DateTime.UtcNow;
-            user.RefreshToken.ExpiresAt = DateTime.UtcNow.AddDays(15);
+            foreach(var refreshToken in user.RefreshTokens)
+            {
+                refreshToken.IsRevoked = true;
+            }
+            var refreshTokenObj = new RefreshToken();
+            refreshTokenObj.CreateRefreshToken();
+
+            user.RefreshTokens.Add(refreshTokenObj);
 
             await _context.SaveChangesAsync(cancellationToken);
 
             return new TokenResponse
             {
                 AccessToken = GenerateAccessToken(user),
-                RefreshToken = user.RefreshToken.Token
+                RefreshToken = refreshTokenObj.GetToken(),
             };
         }
 
@@ -94,28 +100,36 @@ namespace JwT_with_RefreshToken.AuthService
 
         public async Task<TokenResponse?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         {
-            var existingToken = await _context.RefreshTokens
-                 .Include(rt => rt.User)
-                 .ThenInclude(u => u.Roles)
-                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
+            var user = await _context.Users
+                .Include(u => u.Roles)
+                .Include(u => u.RefreshTokens)
+                .FirstOrDefaultAsync(u =>
+                    u.RefreshTokens.Any(rt =>
+                        rt.Token == refreshToken &&
+                        !rt.IsRevoked &&
+                        rt.ExpiresAt > DateTime.UtcNow),
+                    cancellationToken);
 
-            if (existingToken is null || existingToken.ExpiresAt < DateTime.UtcNow)
+            if (user is null)
             {
                 return null;
             }
 
-            var user = existingToken.User;
+            foreach (var token in user.RefreshTokens)
+            {
+                token.IsRevoked = true;
+            }
+            var refreshTokenObj = new RefreshToken();
+            refreshTokenObj.CreateRefreshToken();
 
-            existingToken.Token = GenerateRefreshToken();
-            existingToken.CreatedAt = DateTime.UtcNow;
-            existingToken.ExpiresAt = DateTime.UtcNow.AddDays(15);
+            user.RefreshTokens.Add(refreshTokenObj);
 
             await _context.SaveChangesAsync(cancellationToken);
 
             return new TokenResponse
             {
                 AccessToken = GenerateAccessToken(user),
-                RefreshToken = existingToken.Token
+                RefreshToken = refreshTokenObj.GetToken(),
             };
 
         }
@@ -137,12 +151,12 @@ namespace JwT_with_RefreshToken.AuthService
                 claims.Add(new Claim(ClaimTypes.Role, role.RoleName));
             }
 
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("AppSettings:TokenKey")!));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["AppSettings:TokenKey"]!));
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
             var tokenOptions = new JwtSecurityToken(
-                issuer: _configuration.GetValue<string>("AppSettings:Issuer"),
-                audience: _configuration.GetValue<string>("AppSettings:Audience"),
+                issuer: _configuration["AppSettings:Issuer"],
+                audience: _configuration["AppSettings:Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(5),
                 signingCredentials: signinCredentials);
@@ -150,21 +164,6 @@ namespace JwT_with_RefreshToken.AuthService
             var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
             return accessToken;
-        }
-        string GenerateRefreshToken()
-        {
-            var randomNumber = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomNumber);
-            }
-
-            string randomBase64 = Convert.ToBase64String(randomNumber);
-            string guid = Guid.NewGuid().ToString("N");
-            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(); 
-
-            string refreshToken = $"{timestamp}.{guid}.{randomBase64}";
-            return refreshToken;
         }
     }
 }

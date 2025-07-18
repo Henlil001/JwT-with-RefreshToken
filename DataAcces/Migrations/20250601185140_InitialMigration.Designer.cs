@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JwT_with_RefreshToken.DataAcces.Migrations
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    [Migration("20250531224054_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250601185140_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(88)
@@ -49,11 +52,7 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
                 });
@@ -71,7 +70,12 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("RoleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Roles");
                 });
@@ -114,51 +118,29 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.Property<int>("RolesRoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RolesRoleId", "UsersUserId");
-
-                    b.HasIndex("UsersUserId");
-
-                    b.ToTable("UserRoles", (string)null);
-                });
-
             modelBuilder.Entity("JwT_with_RefreshToken.Entities.RefreshToken", b =>
                 {
                     b.HasOne("JwT_with_RefreshToken.Entities.User", "User")
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("JwT_with_RefreshToken.Entities.RefreshToken", "UserId")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("JwT_with_RefreshToken.Entities.Role", b =>
                 {
-                    b.HasOne("JwT_with_RefreshToken.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RolesRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("JwT_with_RefreshToken.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("Roles")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("JwT_with_RefreshToken.Entities.User", b =>
                 {
-                    b.Navigation("RefreshToken")
-                        .IsRequired();
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

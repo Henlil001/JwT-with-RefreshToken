@@ -1,43 +1,44 @@
 
 using Azure.Identity;
-using JwT_with_RefreshToken.AuthService;
-using JwT_with_RefreshToken.Common;
 using JwT_with_RefreshToken.Configuration;
+using JwT_with_RefreshToken.DataAcces;
 using JwT_with_RefreshToken.Extensions;
 using JwT_with_RefreshToken.Middleware;
 using JwT_with_RefreshToken.SeedData;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Serilog;
 
 namespace JwT_with_RefreshToken
 {
     public class Program
     {
-        public async static Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var configuration = builder.Configuration;
+
 
             if (builder.Environment.IsProduction())
             {
                 builder.Configuration.AddAzureKeyVault(
-                    new Uri($"https://{configuration["KeyVaultName"]}.vault.azure.net/"),
+                    new Uri($"https://{builder.Configuration["KeyVaultName"]}.vault.azure.net/"),
                     new DefaultAzureCredential());
             }
-            //builder.Logging.ConfigurateSerilog(configuration);
 
-            var appSettings = builder.Services.ValidateAppsettings(configuration);
+            ConfigValidator.ValidateAppsettings(builder.Configuration);
 
-            builder.Services
-                .AddControllerExtension()
-                .AddScopedExtension()
-                .AddCorsPolicyExtension(appSettings)
-                .AddJwtBearerExtension(appSettings)
-                .AddDbContextExtension(appSettings);
+            builder.Logging.ConfigurateSerilog(builder.Configuration);
+
+            builder.Services.AddControllerExtension();
+            builder.Services.AddDbContextExtension(builder.Configuration);
+            builder.Services.AddCorsPolicyExtension(builder.Configuration);
+            builder.Services.AddJwtBearerExtension(builder.Configuration);
+            builder.Services.AddScopedExtension();
 
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
+
 
             if (app.Environment.IsDevelopment())
             {
@@ -46,13 +47,14 @@ namespace JwT_with_RefreshToken
 
             app.UseHttpsRedirection();
 
-            app.UseCors(appSettings.CorsPolicyName);
+            app.UseCors(builder.Configuration["AppSettings:CorsPolicyName"]!);
 
             app.UseMiddleware<GlobalMiddleware>();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
-
-            await app.InitializeRolesAsync(appSettings.Roles);
+            var roles = builder.Configuration.GetSection("AppSettings:Roles").Get<List<string>>();
+            await app.InitializeRolesAsync(roles!);
 
             try
             {

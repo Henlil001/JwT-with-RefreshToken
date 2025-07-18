@@ -7,7 +7,7 @@ namespace JwT_with_RefreshToken.Extensions
 {
     public static class JwtBearerExtension
     {
-        public static IServiceCollection AddJwtBearerExtension(this IServiceCollection services, AppSettings appsettings)
+        public static IServiceCollection AddJwtBearerExtension(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthentication(opt =>
             {
@@ -22,9 +22,9 @@ namespace JwT_with_RefreshToken.Extensions
                    ValidateAudience = true,
                    ValidateLifetime = true,
                    ValidateIssuerSigningKey = true,
-                   ValidIssuer = appsettings.Issuer,
-                   ValidAudience = appsettings.Audience,
-                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appsettings.TokenKey)),
+                   ValidIssuer = configuration["AppSettings:Issuer"],
+                   ValidAudience = configuration["AppSettings:Audience"],
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:TokenKey"]!)),
                    RequireExpirationTime = true,
                };
            });

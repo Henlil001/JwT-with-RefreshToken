@@ -9,8 +9,8 @@ namespace JwT_with_RefreshToken.Configuration
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            builder.ClearProviders()
-                .AddSerilog(Log.Logger);
+            builder.ClearProviders();
+            builder.AddSerilog(Log.Logger);
             builder.Services.AddSingleton(Log.Logger);
 
             return builder;

@@ -4,7 +4,7 @@ namespace JwT_with_RefreshToken.Configuration
 {
     public static class ConfigValidator
     {
-        public static AppSettings ValidateAppsettings(this IServiceCollection services, IConfiguration configuration)
+        public static void ValidateAppsettings(IConfiguration configuration)
         {
             var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
 
@@ -15,12 +15,12 @@ namespace JwT_with_RefreshToken.Configuration
                 string.IsNullOrWhiteSpace(appSettings.Issuer) ||
                 string.IsNullOrWhiteSpace(appSettings.Audience) ||
                 string.IsNullOrWhiteSpace(appSettings.TokenKey) ||
-                string.IsNullOrWhiteSpace(appSettings.Roles.User) ||
-                string.IsNullOrWhiteSpace(appSettings.Roles.Admin))
+                appSettings.Roles == null ||
+                appSettings.Roles.Any(string.IsNullOrWhiteSpace))
             {
                 throw new Exception("AppSettings is not fully configured. Please check appsettings.json.");
             }
-            return appSettings;
+
         }
     }
 }

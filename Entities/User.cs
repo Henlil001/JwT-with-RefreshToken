@@ -21,8 +21,7 @@ namespace JwT_with_RefreshToken.Entities
         [Required]
         [StringLength(150)]
         public string Address { get; set; }
-        [Required]
-        public RefreshToken RefreshToken { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; }
         public ICollection<Role> Roles { get; set; } = [];
 
 

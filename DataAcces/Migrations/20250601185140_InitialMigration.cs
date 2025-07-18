@@ -6,24 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace JwT_with_RefreshToken.DataAcces.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
-                {
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Roles", x => x.RoleId);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -50,7 +37,8 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
                     Token = table.Column<string>(type: "nvarchar(88)", maxLength: 88, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -64,45 +52,33 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "Roles",
                 columns: table => new
                 {
-                    RolesRoleId = table.Column<int>(type: "int", nullable: false),
-                    UsersUserId = table.Column<int>(type: "int", nullable: false)
+                    RoleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => new { x.RolesRoleId, x.UsersUserId });
+                    table.PrimaryKey("PK_Roles", x => x.RoleId);
                     table.ForeignKey(
-                        name: "FK_UserRoles_Roles_RolesRoleId",
-                        column: x => x.RolesRoleId,
-                        principalTable: "Roles",
-                        principalColumn: "RoleId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserRoles_Users_UsersUserId",
-                        column: x => x.UsersUserId,
+                        name: "FK_Roles_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_Token",
-                table: "RefreshTokens",
-                column: "Token",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
-                column: "UserId",
-                unique: true);
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UsersUserId",
-                table: "UserRoles",
-                column: "UsersUserId");
+                name: "IX_Roles_UserId",
+                table: "Roles",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -110,9 +86,6 @@ namespace JwT_with_RefreshToken.DataAcces.Migrations
         {
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
-
-            migrationBuilder.DropTable(
-                name: "UserRoles");
 
             migrationBuilder.DropTable(
                 name: "Roles");

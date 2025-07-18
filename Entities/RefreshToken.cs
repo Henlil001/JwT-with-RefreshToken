@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 
 namespace JwT_with_RefreshToken.Entities
 {
@@ -14,17 +15,33 @@ namespace JwT_with_RefreshToken.Entities
         public DateTime CreatedAt { get; set; }
         [Required]
         public DateTime ExpiresAt { get; set; }
-
-        public int UserId { get; set; }
-
-        [ForeignKey(nameof(UserId))]
         public User User { get; set; } = null!;
+        public bool IsRevoked { get; set; } = false;
 
-        public void SetRefreshToken(Func<string> func)
+        public void CreateRefreshToken()
         {
-            Token = func();
+            Token = GenerateToken();
             CreatedAt = DateTime.UtcNow;
             ExpiresAt = DateTime.UtcNow.AddDays(15);
+        }
+        public string GetToken()
+        {
+            return Token;
+        }
+        string GenerateToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+            }
+
+            string randomBase64 = Convert.ToBase64String(randomNumber);
+            string guid = Guid.NewGuid().ToString("N");
+            string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
+            string refreshToken = $"{timestamp}.{guid}.{randomBase64}";
+            return refreshToken;
         }
     }
 }

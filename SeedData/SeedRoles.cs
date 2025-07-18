@@ -8,38 +8,22 @@ namespace JwT_with_RefreshToken.SeedData
 {
     public static class SeedRoles
     {
-        public static async Task InitializeRolesAsync(this IApplicationBuilder app, Roles configRoles)
+        public static async Task InitializeRolesAsync(this IApplicationBuilder app, List<string> roleNames)
         {
-            try
+            using var scope = app.ApplicationServices.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AuthenticationDbContext>();
+
+            foreach (var roleName in roleNames)
             {
-                using var scope = app.ApplicationServices.CreateScope();
-                var context = scope.ServiceProvider.GetRequiredService<AuthenticationDbContext>();
-
-                var roleNames = configRoles
-                          .GetType()
-                          .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                          .Select(p => p.GetValue(configRoles)?.ToString())
-                          .Where(role => !string.IsNullOrWhiteSpace(role))
-                          .Distinct();
-
-                foreach (var roleName in roleNames.ToList())
+                bool exists = await context.Roles.AnyAsync(r => r.RoleName == roleName);
+                if (!exists)
                 {
-                    bool exists = await context.Roles.AnyAsync(r => r.RoleName == roleName);
-                    if (!exists)
-                    {
-                        context.Roles.Add(new Role { RoleName = roleName });
-                    }
-                    
+                    context.Roles.Add(new Role { RoleName = roleName });
                 }
-                //await context.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
 
-                throw;
             }
+            await context.SaveChangesAsync();
 
-          
         }
     }
 }

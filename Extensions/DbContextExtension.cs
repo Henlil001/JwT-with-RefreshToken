@@ -6,9 +6,9 @@ namespace JwT_with_RefreshToken.Extensions
 {
     public static class DbContextExtension
     {
-        public static IServiceCollection AddDbContextExtension(this IServiceCollection services, AppSettings appsettings)
+        public static IServiceCollection AddDbContextExtension(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<AuthenticationDbContext>(options => options.UseSqlServer(appsettings.DbConnString));
+            services.AddDbContext<AuthenticationDbContext>(options => options.UseSqlServer(configuration["AppSettings:DbConnString"]));
             return services;
         }
     }

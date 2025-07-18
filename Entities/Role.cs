@@ -9,6 +9,5 @@ namespace JwT_with_RefreshToken.Entities
         [Required]
         [StringLength(50)]
         public string RoleName { get; set; }
-        public ICollection<User> Users { get; set; }
     }
 }

@@ -8,12 +8,6 @@
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public string TokenKey { get; set; }
-        public Roles Roles { get; set; }
-    }
-
-    public class Roles
-    {
-        public string User { get; set; }
-        public string Admin { get; set; }
+        public  List<string> Roles { get; set; } = [];
     }
 }
