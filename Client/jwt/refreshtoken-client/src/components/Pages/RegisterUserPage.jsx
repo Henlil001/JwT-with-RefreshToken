@@ -2,50 +2,36 @@ import { useState, useEffect } from "react";
 import LoginHeader from "../../components/Headers/LoginHeader/LoginHeader";
 import eyeOff from "../../assets/images/eyeOff.png";
 import eye from "../../assets/images/eye.png";
-import { AppContext } from "../../context/AppProvider";
 import { AuthContext } from "../../context/AuthProvider";
-import { useContext, useRef } from "react";
-
+import { useContext } from "react";
 
 const RegisterUser = () => {
-  const { allClubs } = useContext(AppContext);
   const { handleRegesterUser } = useContext(AuthContext);
 
   const [showFirstPassword, setShowFirstPassword] = useState(false);
-  const [showSecondPassword, setShowSecondPassword] = useState(false);
 
   const [epost, setEpost] = useState("");
   const [repeatEpost, setRepeatEpost] = useState("");
   const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [club, setClub] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setlastname] = useState("");
 
   const [checkEpost, setCheckEpost] = useState(true);
-  const [checkPassword, setCheckPassword] = useState(true);
 
   const toggleFirstPasswordVisibility = () => {
     setShowFirstPassword(!showFirstPassword);
-  };
-
-  const toggleSecondPasswordVisibility = () => {
-    setShowSecondPassword(!showSecondPassword);
   };
 
   useEffect(() => {
     setCheckEpost(epost === repeatEpost);
   }, [epost, repeatEpost]);
 
-  useEffect(() => {
-    setCheckPassword(password === repeatPassword);
-  }, [password, repeatPassword]);
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const form = event.currentTarget;
 
-    if (!checkEpost || !checkPassword) {
-      alert("Epost eller lösenord matchar inte.");
+    if (!checkEpost) {
+      alert("Epost matchar inte.");
       return;
     }
 
@@ -57,9 +43,9 @@ const RegisterUser = () => {
 
     handleRegesterUser({
       email: epost,
-      username: username,
       password: password,
-      myClub: club,
+      firstname: firstname,
+      lastname: lastname,
     });
   };
 
@@ -76,16 +62,30 @@ const RegisterUser = () => {
           noValidate
           onSubmit={handleSubmit}
         >
-          {/* Användarnamn */}
+          {/* Förnamn */}
           <div className="col-12 position-relative">
-            <label htmlFor="username" className="form-label ms-1">
-              Användarnamn
+            <label htmlFor="fornamn" className="form-label ms-1">
+              Förnamn
             </label>
             <input
               type="text"
               className="form-control"
-              id="username"
-              onChange={(e) => setUsername(e.target.value)}
+              id="fornamn"
+              onChange={(e) => setFirstname(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Efternamn */}
+          <div className="col-12 position-relative">
+            <label htmlFor="lastname" className="form-label ms-1">
+              Efternamn
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="lastname"
+              onChange={(e) => setlastname(e.target.value)}
               required
             />
           </div>
@@ -147,56 +147,6 @@ const RegisterUser = () => {
                 />
               </button>
             </div>
-          </div>
-
-          <div className="col-12 position-relative">
-            <label htmlFor="Password2" className="form-label ms-1">
-              Upprepa Lösenord
-            </label>
-            <div className="input-group has-validation">
-              <input
-                type={showSecondPassword ? "text" : "password"}
-                className={`form-control ${checkPassword ? "" : "is-invalid"}`}
-                id="Password2"
-                onChange={(e) => setRepeatPassword(e.target.value)}
-                required
-              />
-              <button
-                className="btn btn-sm border-0"
-                type="button"
-                onClick={toggleSecondPasswordVisibility}
-              >
-                <img
-                  src={showSecondPassword ? eye : eyeOff}
-                  alt={showSecondPassword ? "Dölj" : "Visa"}
-                  style={{ width: "20px", height: "20px" }}
-                />
-              </button>
-              {!checkPassword && (
-                <div className="invalid-feedback">Lösenord matchar inte.</div>
-              )}
-            </div>
-          </div>
-
-          {/* Välj klubb */}
-          <div className="col-12 position-relative">
-            <label htmlFor="club" className="form-label ms-1">
-              Klubb
-            </label>
-            <select
-              className="form-select "
-              id="club"
-              onChange={(e) => setClub(e.target.value)}
-              required
-            >
-              <option value="">Välj...</option>
-              {allClubs.map((club) => (
-                <option key={club.clubID} value={club.clubName}>
-                  {club.clubName}
-                </option>
-              ))}
-            </select>
-            <div className="invalid-feedback">Välj klubb.</div>
           </div>
 
           <div className="col-12 pb-2 text-center">
