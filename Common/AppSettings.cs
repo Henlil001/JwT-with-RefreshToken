@@ -8,6 +8,7 @@
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public string TokenKey { get; set; }
+        public string RefreshTokenCookieName { get; set; }
         public  List<string> Roles { get; set; } = [];
     }
 }

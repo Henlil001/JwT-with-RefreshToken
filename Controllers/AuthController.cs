@@ -1,9 +1,11 @@
 ﻿using JwT_with_RefreshToken.AuthService;
+using JwT_with_RefreshToken.Common;
 using JwT_with_RefreshToken.DTO;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace JwT_with_RefreshToken.Controllers
 {
@@ -13,12 +15,13 @@ namespace JwT_with_RefreshToken.Controllers
     {
         readonly IAuthenticationService _authService;
 
-        readonly string cookieNameRefreshToken = "jwtapp_refreshToken";
+        readonly string cookieNameRefreshToken;
 
 
-        public AuthController(IAuthenticationService authService)
+        public AuthController(IAuthenticationService authService, IOptions<AppSettings> appsettings)
         {
             _authService = authService;
+            cookieNameRefreshToken = appsettings.Value.RefreshTokenCookieName;
         }
 
         [HttpPost("login")]
@@ -60,7 +63,7 @@ namespace JwT_with_RefreshToken.Controllers
                 SameSite = SameSiteMode.None,
             });
 
-            return Ok(new { AccessToken = tokenResponse.AccessToken });
+            return Ok(new { tokenResponse.AccessToken });
         }
         [HttpPost("create-user")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -81,7 +84,7 @@ namespace JwT_with_RefreshToken.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.None,
             });
-            return Ok(new { AccessToken = result.TokenResponse.AccessToken });
+            return Ok(new { result.TokenResponse.AccessToken });
         }
     }
 }
