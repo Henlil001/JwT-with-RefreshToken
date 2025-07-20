@@ -1,4 +1,4 @@
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Headers/HomeHeader";
 import { useEffect, useState } from "react";
 
@@ -27,7 +27,9 @@ const HomePage = () => {
       <Header title="Övningsbank" />
       <div className="text-align-center">
         <h1>Startsida</h1>
-        <p>Du är inloggad som <strong>{username}</strong></p>
+        <p>
+          Du är inloggad som <strong>{username}</strong>
+        </p>
       </div>
     </>
   );
