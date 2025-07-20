@@ -1,0 +1,4 @@
+.navlink {
+  color: black; /* Sätter textfärgen till svart */
+  text-decoration: none !important; /* Tar bort understrykning */
+}

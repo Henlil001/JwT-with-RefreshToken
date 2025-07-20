@@ -1,0 +1,29 @@
+@media (max-width: 992px) {
+  .nav-item {
+    margin-right: 10px; /* Minska mellanrummet mellan kategorier på mindre skärm */
+  }
+  .navbar-nav {
+    margin-top: 10px; /* Lägger till lite utrymme mellan navbaren och kategorierna */
+  }
+}
+
+@media (max-width: 576px) {
+  .nav {
+    display: none; /* Dölj kategorier helt när skärmen blir riktigt liten */
+  }
+  .dropdown-menu {
+    width: 100%;
+    display: block;
+  }
+}
+/* Ordning på små skärmar */
+@media (max-width: 991px) {
+  .dropdown-item {
+    order: 1; /* Gör alla länkar till ordning 1 */
+  }
+
+  .dropdown-item:last-child,
+  .dropdown-divider:last-child {
+    order: 2; /* Sätt de sista två länkarna (Hantera profil och Logga ut) till ordning 2 */
+  }
+}

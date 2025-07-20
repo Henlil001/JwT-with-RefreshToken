@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import eyeOff from "../../assets/images/eyeOff.png";
 import eye from "../../assets/images/eye.png";
-import LoginHeader from "../../components/Headers/LoginHeader/LoginHeader";
+import LoginHeader from "../../components/Headers/LoginHeader";
 import { AuthContext } from "../../context/AuthProvider";
 
 const LoginPage = () => {

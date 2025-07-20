@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import LoginHeader from "../../components/Headers/LoginHeader/LoginHeader";
+import LoginHeader from "../../components/Headers/LoginHeader/";
 import eyeOff from "../../assets/images/eyeOff.png";
 import eye from "../../assets/images/eye.png";
 import { AuthContext } from "../../context/AuthProvider";
