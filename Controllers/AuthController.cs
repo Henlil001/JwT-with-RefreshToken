@@ -13,6 +13,9 @@ namespace JwT_with_RefreshToken.Controllers
     {
         readonly IAuthenticationService _authService;
 
+        readonly string cookieNameRefreshToken = "jwtapp_refreshToken";
+
+
         public AuthController(IAuthenticationService authService)
         {
             _authService = authService;
@@ -27,7 +30,7 @@ namespace JwT_with_RefreshToken.Controllers
             if (tokenResponse is null)
                 return Unauthorized(new { message = "Invalid credentials." });
 
-            Response.Cookies.Append("refreshToken", tokenResponse.RefreshToken, new CookieOptions
+            Response.Cookies.Append(cookieNameRefreshToken, tokenResponse.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -41,7 +44,7 @@ namespace JwT_with_RefreshToken.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
         {
-            var refreshToken = Request.Cookies["refreshToken"];
+            var refreshToken = Request.Cookies[cookieNameRefreshToken];
             if (string.IsNullOrEmpty(refreshToken))
                 return Unauthorized();
 
@@ -50,7 +53,7 @@ namespace JwT_with_RefreshToken.Controllers
             if (tokenResponse is null)
                 return Unauthorized(new { message = "Invalid refresh token." });
 
-            Response.Cookies.Append("refreshToken", tokenResponse.RefreshToken, new CookieOptions
+            Response.Cookies.Append(cookieNameRefreshToken, tokenResponse.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -72,7 +75,7 @@ namespace JwT_with_RefreshToken.Controllers
                     return Conflict(new { message = "User with this email already exists." });
 
             }
-            Response.Cookies.Append("refreshToken", result.TokenResponse.RefreshToken, new CookieOptions
+            Response.Cookies.Append(cookieNameRefreshToken, result.TokenResponse.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,

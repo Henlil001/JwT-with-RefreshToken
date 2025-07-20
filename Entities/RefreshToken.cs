@@ -28,7 +28,7 @@ namespace JwT_with_RefreshToken.Entities
         {
             return Token;
         }
-        string GenerateToken()
+        static string GenerateToken()
         {
             var randomNumber = new byte[32];
             using (var rng = RandomNumberGenerator.Create())

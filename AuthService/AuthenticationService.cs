@@ -141,9 +141,9 @@ namespace JwT_with_RefreshToken.AuthService
         {
             var claims = new List<Claim>
            {
-               new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-               new Claim(ClaimTypes.Name, user.FirstName),
-               new Claim(ClaimTypes.Email, user.Email),
+               new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+               new(ClaimTypes.Name, user.FirstName),
+               new(ClaimTypes.Email, user.Email),
            };
 
             foreach (var role in user.Roles)

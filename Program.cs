@@ -25,7 +25,7 @@ namespace JwT_with_RefreshToken
                     new DefaultAzureCredential());
             }
 
-            ConfigValidator.ValidateAppsettings(builder.Configuration);
+            builder.Services.ValidateAppsettings(builder.Configuration);
 
             builder.Logging.ConfigurateSerilog(builder.Configuration);
 
@@ -35,14 +35,14 @@ namespace JwT_with_RefreshToken
             builder.Services.AddJwtBearerExtension(builder.Configuration);
             builder.Services.AddScopedExtension();
 
-            builder.Services.AddOpenApi();
+            builder.Services.AddSwaggerExtended();
 
             var app = builder.Build();
 
 
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                app.UseSwaggerExtended();
             }
 
             app.UseHttpsRedirection();
