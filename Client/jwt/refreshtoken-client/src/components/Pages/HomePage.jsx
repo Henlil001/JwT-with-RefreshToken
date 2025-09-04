@@ -1,30 +1,16 @@
-import { jwtDecode } from "jwt-decode";
 import Header from "../../components/Headers/HomeHeader";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthProvider";
 
 const HomePage = () => {
-    const navigate = useNavigate(); // ✅ måste ligga här
+  const { handleRefreshtoken, LogOut, isAuthenticated, loading, user } =
+    useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    debugger;
-    // 1. Hämta JWT från localStorage (eller cookie om du använder det)
-    const token = localStorage.getItem("accessToken"); // justera om du använder annat namn
-
-    if (token) {
-      try {
-        // 2. Avkoda token
-        const decoded = jwtDecode(token);
-
-        // 3. Sätt värde från t.ex. "name" eller "sub"
-        setUsername(decoded.name);
-      } catch (error) {
-        console.error("Ogiltig token", error);
-      }
-    }
-    else{
-
-      navigate('/')
+    if(isAuthenticated === false){
+      navigate("/");
     }
   }, []);
 
@@ -34,7 +20,7 @@ const HomePage = () => {
       <div className="text-align-center">
         <h1>Startsida</h1>
         <p>
-          Du är inloggad som <strong>{username}</strong>
+          Du är inloggad som <strong>{user.name}</strong>
         </p>
       </div>
     </>

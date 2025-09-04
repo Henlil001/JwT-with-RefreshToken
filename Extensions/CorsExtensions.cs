@@ -13,7 +13,7 @@ namespace JwT_with_RefreshToken.Extensions
             .AllowCredentials()
             .AllowAnyHeader()
             .WithOrigins(configuration["AppSettings:ClientDomain"]!)
-            .WithMethods("POST")));
+            .WithMethods("GET", "POST")));
 
             return services;
         

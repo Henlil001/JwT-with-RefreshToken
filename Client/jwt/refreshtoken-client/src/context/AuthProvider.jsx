@@ -1,5 +1,5 @@
 import { useState, createContext, useEffect } from "react";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from "react-router-dom";
 import * as AuthService from "../services/AuthService";
 
@@ -7,19 +7,19 @@ export const AuthContext = createContext();
 
 const AuthProvider = (props) => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
-  const [emailAllreadyExist, setEmailAllreadyExist] = useState(null)
+  const [user, setUser] = useState({});
+  const [emailAllreadyExist, setEmailAllreadyExist] = useState(null);
 
   const setTokenAndUser = (token) => {
     localStorage.setItem("accesstoken", token);
     if (token) {
-      debugger
+      debugger;
       const decoded = jwtDecode(token);
       setUser({
         id: decoded.id,
-        username: decoded.username,
+        name: decoded.name,
       });
       setIsAuthenticated(true);
     } else {
@@ -35,19 +35,24 @@ const AuthProvider = (props) => {
     navigate("/");
   };
 
-  const handleLogin = async ({ epost, password }) => {
-    setLoading(true)
+  const handleLogin = async ({ email, password }) => {
+    debugger;
+    setLoading(true);
+    const LoginRequest = { Email: email, Password: password };
     try {
-      const response = await AuthService.Login(epost, password);
-      setTokenAndUser(data.accessToken);
+      const response = await AuthService.Login(LoginRequest);
       if (response.status === 200) {
         const data = await response.json();
         setTokenAndUser(data.accessToken);
         navigate("/home");
+        setLoading(false);
+        return true;
       } else if (response.status === 401) {
-        isAuthenticated(false);
+        setIsAuthenticated(false);
+        setLoading(false);
+        return false;
       }
-      setLoading(false);
+      
     } catch (error) {
       console.error("Login failed", error);
       navigate("/error");
@@ -58,8 +63,8 @@ const AuthProvider = (props) => {
   const handleRegisterUser = async (newUser) => {
     setLoading(true);
     try {
-      const response = await AuthService.CreateUser({newUser})
-        if (response.status === 200) {
+      const response = await AuthService.CreateUser({ newUser });
+      if (response.status === 200) {
         const data = await response.json();
         setTokenAndUser(data.accessToken);
         navigate("/home");
@@ -67,7 +72,6 @@ const AuthProvider = (props) => {
         setIsAuthenticated(false);
         setEmailAllreadyExist(true);
       }
-      
     } catch (error) {
       console.error("register new user failed", error);
       navigate("/error");
@@ -81,15 +85,15 @@ const AuthProvider = (props) => {
       const response = await AuthService.RefreshToken();
       if (response.status === 401) {
         LogOut();
-      } else if (response === 200) {
+      } else if (response.status === 200) {
         const data = await response.json();
-        setTokenAndUser(data.accessToken)
+        setTokenAndUser(data.accessToken);
       }
     } catch (error) {
       console.error("refreshtoken failed", error);
       navigate("/error");
     }
-     setLoading(false);
+    setLoading(false);
   };
 
   return (
@@ -102,7 +106,7 @@ const AuthProvider = (props) => {
         isAuthenticated,
         loading,
         user,
-        emailAllreadyExist
+        emailAllreadyExist,
       }}
     >
       {props.children}

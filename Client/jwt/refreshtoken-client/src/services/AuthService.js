@@ -38,15 +38,16 @@ export const LogOut = async ()=>{
   }
 }
 
-export const Login = async ({loginrequest}) => {
+export const Login = async (LoginRequest) => {
   try {
     const response = await fetch(urls.login, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ loginrequest }),
+      body: JSON.stringify(LoginRequest),
     });
+    debugger
     if (response.status === 500) {
       throw new Error("Server error");
     }

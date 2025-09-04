@@ -1,10 +1,9 @@
-
 import { useState, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import AccountIcon from "../../assets/images/accountIcon.png";
+import "./css/HomeHeader.css";
+import klubbaloga from "../../assets/images/hockeyklubbaloga.jpg";
 import { AuthContext } from "../../context/AuthProvider";
-import './css/HomeHeader.css'
-import klubbaloga from '../../assets/images/hockeyklubbaloga.jpg'
 
 const Header = ({ imageUrl, title }) => {
   const { LogOut } = useContext(AuthContext);
@@ -126,7 +125,7 @@ const Header = ({ imageUrl, title }) => {
                 Hantera profil
               </NavLink>
               <div className="dropdown-divider"></div>
-              <button onClick={()=>LogOut()} className="dropdown-item">
+              <button onClick={() => LogOut()} className="dropdown-item">
                 Logga ut
               </button>
             </div>
