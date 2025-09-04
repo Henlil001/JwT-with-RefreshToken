@@ -1,14 +1,14 @@
+import { fetchWithAuth } from "./ApiService";
 import urls from "../const/urls";
 
-export const GetAllProducts = async ()=>{
-    const response = await fetch(urls.allProducts, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accesstoken")}`
-      },
-      credentials: "include",
-    }).then(response.json(data));
-    return data;
-    
-}
+export const GetAllProducts = async () => {
+  const response = await fetchWithAuth(urls.allProducts, {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  return await response.json();
+};

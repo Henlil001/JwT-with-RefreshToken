@@ -4,10 +4,10 @@ export const RefreshToken = async () => {
   try {
     const response = await fetch(urls.refreshtoken, {
       method: "post",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include",
     });
     if (response.status === 500) {
        throw new Error("Server error");
@@ -18,6 +18,25 @@ export const RefreshToken = async () => {
     throw error;
   }
 };
+
+export const LogOut = async ()=>{
+   try {
+    const response = await fetch(urls.logout, {
+      method: "post",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.status === 500) {
+       throw new Error("Server error");
+    }
+    return response;
+  } catch (error) {
+    console.error("logout failed", error);
+    throw error;
+  }
+}
 
 export const Login = async ({loginrequest}) => {
   try {

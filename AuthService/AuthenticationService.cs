@@ -78,7 +78,7 @@ namespace JwT_with_RefreshToken.AuthService
                 return null;
             }
 
-            foreach(var refreshToken in user.RefreshTokens)
+            foreach (var refreshToken in user.RefreshTokens)
             {
                 refreshToken.IsRevoked = true;
             }
@@ -96,7 +96,14 @@ namespace JwT_with_RefreshToken.AuthService
             };
         }
 
+        public async Task<bool> RevokeRefreshToken(string refresToken, CancellationToken cancellationToken)
+        {
+            var refreshtoken = await _context.RefreshTokens.Include(u => u.User).FirstOrDefaultAsync(rf => rf.Token == refresToken, cancellationToken: cancellationToken) ?? throw new InvalidOperationException();
 
+            refreshtoken.IsRevoked = true;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
 
         public async Task<TokenResponse?> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         {

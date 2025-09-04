@@ -1,5 +1,4 @@
 import { useState, createContext, useEffect } from "react";
-import Cookies from "js-cookie";
 import jwtDecode from "jwt-decode";
 import { useNavigate, useParams } from "react-router-dom";
 import * as AuthService from "../services/AuthService";
@@ -29,9 +28,10 @@ const AuthProvider = (props) => {
     }
   };
 
-  const LogOut = () => {
+  const LogOut = async () => {
     setIsAuthenticated(false);
     localStorage.removeItem("accesstoken");
+    await AuthService.LogOut();
     navigate("/");
   };
 
@@ -41,7 +41,7 @@ const AuthProvider = (props) => {
       const response = await AuthService.Login(epost, password);
       setTokenAndUser(data.accessToken);
       if (response.status === 200) {
-        const data = response.json();
+        const data = await response.json();
         setTokenAndUser(data.accessToken);
         navigate("/home");
       } else if (response.status === 401) {
@@ -60,7 +60,7 @@ const AuthProvider = (props) => {
     try {
       const response = await AuthService.CreateUser({newUser})
         if (response.status === 200) {
-        const data = response.json();
+        const data = await response.json();
         setTokenAndUser(data.accessToken);
         navigate("/home");
       } else if (response.status === 409) {
@@ -82,7 +82,7 @@ const AuthProvider = (props) => {
       if (response.status === 401) {
         LogOut();
       } else if (response === 200) {
-        const data = response.json();
+        const data = await response.json();
         setTokenAndUser(data.accessToken)
       }
     } catch (error) {

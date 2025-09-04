@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
-  const [username, setUsername] = useState("");
     const navigate = useNavigate(); // ✅ måste ligga här
 
   useEffect(() => {

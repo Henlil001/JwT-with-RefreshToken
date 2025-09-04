@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
+using System.Threading;
 
 namespace JwT_with_RefreshToken.Controllers
 {
@@ -40,8 +41,28 @@ namespace JwT_with_RefreshToken.Controllers
                 SameSite = SameSiteMode.None,
             });
 
-            return Ok( new { tokenResponse.AccessToken });
+            return Ok(new { tokenResponse.AccessToken });
         }
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogOut(CancellationToken cancellationToken)
+        {
+            var refreshToken = Request.Cookies[cookieNameRefreshToken];
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                await _authService.RevokeRefreshToken(refreshToken, cancellationToken);
+                Response.Cookies.Append("refreshToken", "", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.UtcNow.AddDays(-1) 
+                });
+                return Ok(new { message = "Logged out" });
+            }
+
+            return BadRequest(); 
+        }
+
         [HttpPost("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
