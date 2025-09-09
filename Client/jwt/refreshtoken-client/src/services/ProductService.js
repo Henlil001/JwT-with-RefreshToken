@@ -3,7 +3,7 @@ import urls from "../const/urls";
 
 export const GetAllProducts = async () => {
   const response = await fetchWithAuth(urls.allProducts, {
-    method: "POST",
+    method: "GET",
   });
 
   if (!response.ok) {

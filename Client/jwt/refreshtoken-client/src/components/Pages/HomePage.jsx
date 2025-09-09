@@ -20,7 +20,7 @@ const HomePage = () => {
       <div className="text-align-center">
         <h1>Startsida</h1>
         <p>
-          Du är inloggad som <strong>{user.name}</strong>
+          Hej och välkommen <strong>{user.name}</strong>
         </p>
       </div>
     </>
