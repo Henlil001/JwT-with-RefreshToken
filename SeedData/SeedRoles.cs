@@ -24,6 +24,8 @@ namespace JwT_with_RefreshToken.SeedData
             }
             await context.SaveChangesAsync();
 
+
+
         }
     }
 }

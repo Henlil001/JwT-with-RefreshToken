@@ -12,7 +12,7 @@ const HomePage = () => {
     if(isAuthenticated === false){
       navigate("/");
     }
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <>

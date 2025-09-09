@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import LoginHeader from "../../components/Headers/LoginHeader/";
 import eyeOff from "../../assets/images/eyeOff.png";
 import eye from "../../assets/images/eye.png";
 import { AuthContext } from "../../context/AuthProvider";
 import { useContext } from "react";
+import Spinner from "../Features/Spinner";
 
 const RegisterUser = () => {
-  const { handleRegesterUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { handleRegisterUser, loading } = useContext(AuthContext);
+  
 
   const [showFirstPassword, setShowFirstPassword] = useState(false);
 
@@ -15,6 +19,7 @@ const RegisterUser = () => {
   const [password, setPassword] = useState("");
   const [firstname, setFirstname] = useState("");
   const [lastname, setlastname] = useState("");
+  const [error, setError] = useState(false)
 
   const [checkEpost, setCheckEpost] = useState(true);
 
@@ -26,7 +31,7 @@ const RegisterUser = () => {
     setCheckEpost(epost === repeatEpost);
   }, [epost, repeatEpost]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
 
@@ -41,12 +46,19 @@ const RegisterUser = () => {
       return;
     }
 
-    handleRegesterUser({
+    const result = await handleRegisterUser({
       email: epost,
       password: password,
       firstname: firstname,
       lastname: lastname,
     });
+
+    if(!result){
+      setError(true)
+    }
+    else{
+      navigate("/home");
+    }
   };
 
   return (
@@ -62,6 +74,15 @@ const RegisterUser = () => {
           noValidate
           onSubmit={handleSubmit}
         >
+          {/* Spinner-overlay */}
+        {loading && (
+          <div
+            className="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+            style={{ backgroundColor: "rgba(255, 255, 255, 0.7)", zIndex: 10 }}
+          >
+            <Spinner />
+          </div>
+        )}
           {/* Förnamn */}
           <div className="col-12 position-relative">
             <label htmlFor="fornamn" className="form-label ms-1">
@@ -148,7 +169,21 @@ const RegisterUser = () => {
               </button>
             </div>
           </div>
-
+ {/* Felmeddelande under formuläret */}
+              {error && (
+                <div
+                  className="alert alert-danger alert-dismissible fade show mt-3"
+                  role="alert"
+                >
+                  Eposten är redan registrerad, har du glömt ditt lösenord?.
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={() => setError(false)}
+                  ></button>
+                </div>
+              )}
           <div className="col-12 pb-2 text-center">
             <button
               className="btn btn-primary mb-4 mt-4 btn-lg w-50"

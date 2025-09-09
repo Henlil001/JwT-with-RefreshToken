@@ -52,13 +52,13 @@ namespace JwT_with_RefreshToken.AuthService
                 LastName = user.LastName,
                 Email = user.Email,
                 Password = BCrypt.Net.BCrypt.HashPassword(user.Password),
-                Address = user.Address,
                 RefreshTokens = [refreshTokenObj],
                 Roles = [defaultRole]
             };
 
             userResult.TokenResponse.RefreshToken = refreshTokenObj.GetToken();
             userResult.TokenResponse.AccessToken = GenerateAccessToken(newUser);
+            userResult.Success = true;
 
             await _context.Users.AddAsync(newUser, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);

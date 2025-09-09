@@ -10,7 +10,6 @@ const AuthProvider = (props) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({});
-  const [emailAllreadyExist, setEmailAllreadyExist] = useState(null);
 
   const setTokenAndUser = (token) => {
     localStorage.setItem("accesstoken", token);
@@ -36,7 +35,6 @@ const AuthProvider = (props) => {
   };
 
   const handleLogin = async ({ email, password }) => {
-    debugger;
     setLoading(true);
     const LoginRequest = { Email: email, Password: password };
     try {
@@ -52,7 +50,6 @@ const AuthProvider = (props) => {
         setLoading(false);
         return false;
       }
-      
     } catch (error) {
       console.error("Login failed", error);
       navigate("/error");
@@ -60,17 +57,32 @@ const AuthProvider = (props) => {
     }
   };
 
-  const handleRegisterUser = async (newUser) => {
+  const handleRegisterUser = async ({
+   email,
+   password,
+   firstname,
+   lastname,
+  }) => {
+    debugger
     setLoading(true);
+    const newUser = {
+      Email: email,
+      Password: password,
+      FirstName: firstname,
+      LastName: lastname,
+    };
+
     try {
-      const response = await AuthService.CreateUser({ newUser });
+      const response = await AuthService.CreateUser(newUser);
       if (response.status === 200) {
         const data = await response.json();
         setTokenAndUser(data.accessToken);
-        navigate("/home");
+        setLoading(false);
+        return true;
       } else if (response.status === 409) {
         setIsAuthenticated(false);
-        setEmailAllreadyExist(true);
+        setLoading(false);
+        return false;
       }
     } catch (error) {
       console.error("register new user failed", error);
@@ -106,7 +118,6 @@ const AuthProvider = (props) => {
         isAuthenticated,
         loading,
         user,
-        emailAllreadyExist,
       }}
     >
       {props.children}

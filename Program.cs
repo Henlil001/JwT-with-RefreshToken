@@ -55,6 +55,7 @@ namespace JwT_with_RefreshToken
             app.MapControllers();
             var roles = builder.Configuration.GetSection("AppSettings:Roles").Get<List<string>>();
             await app.InitializeRolesAsync(roles!);
+            await app.AddProductsAsync();
 
             try
             {

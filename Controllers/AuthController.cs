@@ -1,11 +1,14 @@
 ﻿using JwT_with_RefreshToken.AuthService;
 using JwT_with_RefreshToken.Common;
 using JwT_with_RefreshToken.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Validations;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 
 namespace JwT_with_RefreshToken.Controllers
@@ -43,24 +46,30 @@ namespace JwT_with_RefreshToken.Controllers
 
             return Ok(new { tokenResponse.AccessToken });
         }
+        [Authorize]
         [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> LogOut(CancellationToken cancellationToken)
         {
             var refreshToken = Request.Cookies[cookieNameRefreshToken];
             if (!string.IsNullOrEmpty(refreshToken))
             {
-                await _authService.RevokeRefreshToken(refreshToken, cancellationToken);
-                Response.Cookies.Append("refreshToken", "", new CookieOptions
+              var result = await _authService.RevokeRefreshToken(refreshToken, cancellationToken);
+                if (!result)
                 {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTime.UtcNow.AddDays(-1) 
-                });
-                return Ok(new { message = "Logged out" });
+                    Response.Cookies.Append(cookieNameRefreshToken, "", new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Expires = DateTime.UtcNow.AddDays(-1)
+                    });
+                    return Ok(new { message = "Logged out" });
+                }
             }
 
-            return BadRequest(); 
+            return BadRequest();
         }
 
         [HttpPost("refresh")]
@@ -97,6 +106,10 @@ namespace JwT_with_RefreshToken.Controllers
             {
                 if (result.ErrorCode == "UserExists")
                     return Conflict(new { message = "User with this email already exists." });
+                else
+                {
+                    return Unauthorized();
+                }
 
             }
             Response.Cookies.Append(cookieNameRefreshToken, result.TokenResponse.RefreshToken, new CookieOptions

@@ -58,14 +58,15 @@ export const Login = async (LoginRequest) => {
   }
 };
 
-export const CreateUser = async ({ user }) => {
+export const CreateUser = async (newUser) => {
+    debugger;
   try {
-    const response = await fetch(urls.login, {
+    const response = await fetch(urls.createUser, {
       method: "post",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user }),
+      body: JSON.stringify(newUser),
     });
     if (response.status === 500) {
       throw new Error("Server error");

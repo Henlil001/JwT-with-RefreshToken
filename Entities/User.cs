@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace JwT_with_RefreshToken.Entities
 {
@@ -18,9 +19,9 @@ namespace JwT_with_RefreshToken.Entities
         [Required]
         [StringLength(100)]
         public string LastName { get; set; }
-        [Required]
+        [AllowNull]
         [StringLength(150)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
         public ICollection<RefreshToken> RefreshTokens { get; set; }
         public ICollection<Role> Roles { get; set; } = [];
 
